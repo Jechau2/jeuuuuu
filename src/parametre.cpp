@@ -1,40 +1,8 @@
 #include "parametre.h"
+#include "ui_helpers.h"
 #include <SDL2/SDL_ttf.h>
 #include <vector>
 #include <iostream>
-
-static void renderOption(SDL_Renderer* renderer, TTF_Font* font,
-                         const std::string& text, int x, int y, bool selected) {
-    SDL_Color color = selected ? SDL_Color{255, 255, 0, 255}
-                               : SDL_Color{255, 255, 255, 255};
-    SDL_Surface* surf = TTF_RenderUTF8_Blended(font, text.c_str(), color);
-    if (!surf) {
-        std::cerr << "Failed to create surface: " << TTF_GetError() << std::endl;
-        return;
-    }
-    SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
-    SDL_Rect dst{x, y, surf->w, surf->h};
-    SDL_FreeSurface(surf);
-    if (tex) {
-        SDL_RenderCopy(renderer, tex, nullptr, &dst);
-        SDL_DestroyTexture(tex);
-    }
-}
-
-static void renderSliderOption(SDL_Renderer* renderer, TTF_Font* font,
-                               const std::string& label,
-                               const std::vector<std::string>& options,
-                               int index, int x, int y, bool selected) {
-    std::string line = label + ": ";
-    for (size_t i = 0; i < options.size(); ++i) {
-        if (i == static_cast<size_t>(index))
-            line += "[" + options[i] + "]";
-        else
-            line += options[i];
-        if (i + 1 < options.size()) line += " | ";
-    }
-    renderOption(renderer, font, line, x, y, selected);
-}
 
 void showSettings(SDL_Window* window, SDL_Renderer* renderer,
                   int &width, int &height, int &fps, std::string &language) {
@@ -73,6 +41,58 @@ void showSettings(SDL_Window* window, SDL_Renderer* renderer,
     bool running = true;
     SDL_Event e;
     while (running) {
+        SDL_Rect langRect{}, sizeRect{}, fpsRect{};
+        std::vector<SDL_Rect> languageRects(languages.size());
+
+        if (!langMenu) {
+            std::string tmp = "Langue: " + languages[langIndex] + " v";
+            int tw, th;
+            TTF_SizeUTF8(font, tmp.c_str(), &tw, &th);
+            langRect = {50, 80, tw, th};
+
+            tmp = "Taille fenetre"; // We'll compute slider text with options
+            std::string line = "Taille fenetre: ";
+            for (size_t i=0;i<sizeLabels.size();++i){
+                if(i==static_cast<size_t>(sizeIndex)) line+="["+sizeLabels[i]+"]"; else line+=sizeLabels[i];
+                if(i+1<sizeLabels.size()) line+=" | ";
+            }
+            TTF_SizeUTF8(font, line.c_str(), &tw, &th);
+            sizeRect = {50, 140, tw, th};
+
+            line = "FPS: ";
+            for(size_t i=0;i<fpsLabels.size();++i){
+                if(i==static_cast<size_t>(fpsIndex)) line+="["+fpsLabels[i]+"]"; else line+=fpsLabels[i];
+                if(i+1<fpsLabels.size()) line+=" | ";
+            }
+            TTF_SizeUTF8(font, line.c_str(), &tw, &th);
+            fpsRect = {50, 200, tw, th};
+        } else {
+            std::string tmp = "Langue v";
+            int tw, th;
+            TTF_SizeUTF8(font, tmp.c_str(), &tw, &th);
+            langRect = {50, 80, tw, th};
+
+            for (size_t i=0;i<languages.size();++i){
+                TTF_SizeUTF8(font, languages[i].c_str(), &tw, &th);
+                languageRects[i] = {70, 120 + static_cast<int>(i)*40, tw, th};
+            }
+
+            std::string line = "Taille fenetre: ";
+            for (size_t i=0;i<sizeLabels.size();++i){
+                if(i==static_cast<size_t>(sizeIndex)) line+="["+sizeLabels[i]+"]"; else line+=sizeLabels[i];
+                if(i+1<sizeLabels.size()) line+=" | ";
+            }
+            TTF_SizeUTF8(font, line.c_str(), &tw, &th);
+            sizeRect = {50, 120 + static_cast<int>(languages.size()) * 40 + 40, tw, th};
+
+            line = "FPS: ";
+            for(size_t i=0;i<fpsLabels.size();++i){
+                if(i==static_cast<size_t>(fpsIndex)) line+="["+fpsLabels[i]+"]"; else line+=fpsLabels[i];
+                if(i+1<fpsLabels.size()) line+=" | ";
+            }
+            TTF_SizeUTF8(font, line.c_str(), &tw, &th);
+            fpsRect = {50, sizeRect.y + 60, tw, th};
+        }
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT)
                 running = false;
@@ -120,6 +140,35 @@ void showSettings(SDL_Window* window, SDL_Renderer* renderer,
                                 fpsIndex = (fpsIndex + 1) % fpsOptions.size();
                         }
                         break;
+                }
+            } else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                int mx = e.button.x;
+                int my = e.button.y;
+                if (!langMenu) {
+                    if (pointInRect(mx, my, langRect)) {
+                        langMenu = !langMenu;
+                        current = LANG;
+                    } else if (pointInRect(mx, my, sizeRect)) {
+                        sizeIndex = (sizeIndex + 1) % sizes.size();
+                        current = SIZE;
+                    } else if (pointInRect(mx, my, fpsRect)) {
+                        fpsIndex = (fpsIndex + 1) % fpsOptions.size();
+                        current = FPS;
+                    }
+                } else {
+                    if (pointInRect(mx, my, langRect)) {
+                        langMenu = false;
+                    }
+                    for (size_t i = 0; i < languages.size(); ++i) {
+                        if (pointInRect(mx, my, languageRects[i])) {
+                            langIndex = static_cast<int>(i);
+                        }
+                    }
+                    if (pointInRect(mx, my, sizeRect)) {
+                        sizeIndex = (sizeIndex + 1) % sizes.size();
+                    } else if (pointInRect(mx, my, fpsRect)) {
+                        fpsIndex = (fpsIndex + 1) % fpsOptions.size();
+                    }
                 }
             }
         }
