@@ -1,5 +1,6 @@
 #include "menu.h"
 #include "parametre.h"
+#include "jeu.h"
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <vector>
@@ -65,7 +66,8 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
                 for (size_t i = 0; i < buttons.size(); ++i) {
                     if (pointInRect(mx, my, buttons[i].rect)) {
                         if (i == 0) {
-                            std::cout << "Jouer clicked" << std::endl;
+                            showGame(window, renderer);
+                            updateButtons();
                         } else if (i == 1) {
                             std::cout << "Charger clicked" << std::endl;
                         } else if (i == 2) {
