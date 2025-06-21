@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "parametre.h"
 
 struct Button {
     SDL_Rect rect;
@@ -25,8 +26,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    const int width = 800;
-    const int height = 600;
+    int width = 800;
+    int height = 600;
+    int targetFPS = 60;
+    std::string language = "Francais";
 
     SDL_Window* window = SDL_CreateWindow("Menu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                           width, height, SDL_WINDOW_SHOWN);
@@ -37,7 +40,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) {
         std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(window);
@@ -60,30 +63,35 @@ int main(int argc, char* argv[]) {
     std::vector<Button> buttons;
     int btnW = 200;
     int btnH = 50;
-    int centerX = (width - btnW) / 2;
     int startY = 150;
     int spacing = 20;
 
-    buttons.push_back({{centerX, startY, btnW, btnH}, "Jouer"});
-    buttons.push_back({{centerX, startY + (btnH + spacing), btnW, btnH}, "Charg\xC3\xA9"});
-    buttons.push_back({{centerX, startY + 2 * (btnH + spacing), btnW, btnH}, "Param\xC3\xA8tre"});
-    // quit button bottom right
-    buttons.push_back({{width - btnW - 20, height - btnH - 20, btnW, btnH}, "Quitter"});
-
-    SDL_Color textColor{255, 255, 255, 255};
-    for (auto& b : buttons) {
-        SDL_Surface* surf = TTF_RenderUTF8_Blended(font, b.label.c_str(), textColor);
-        if (!surf) {
-            std::cerr << "Failed to create surface: " << TTF_GetError() << std::endl;
-            continue;
+    auto updateButtons = [&]() {
+        int centerX = (width - btnW) / 2;
+        buttons.clear();
+        buttons.push_back({{centerX, startY, btnW, btnH}, "Jouer"});
+        buttons.push_back({{centerX, startY + (btnH + spacing), btnW, btnH}, "Charg\xC3\xA9"});
+        buttons.push_back({{centerX, startY + 2 * (btnH + spacing), btnW, btnH}, "Param\xC3\xA8tre"});
+        buttons.push_back({{width - btnW - 20, height - btnH - 20, btnW, btnH}, "Quitter"});
+        for (auto& b : buttons) {
+            if (b.texture) {
+                SDL_DestroyTexture(b.texture);
+                b.texture = nullptr;
+            }
+            SDL_Surface* surf = TTF_RenderUTF8_Blended(font, b.label.c_str(), SDL_Color{255,255,255,255});
+            if (surf) {
+                b.texture = SDL_CreateTextureFromSurface(renderer, surf);
+                SDL_FreeSurface(surf);
+            }
         }
-        b.texture = SDL_CreateTextureFromSurface(renderer, surf);
-        SDL_FreeSurface(surf);
-    }
+    };
+
+    updateButtons();
 
     bool running = true;
     SDL_Event e;
     while (running) {
+        Uint32 frameStart = SDL_GetTicks();
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 running = false;
@@ -97,7 +105,8 @@ int main(int argc, char* argv[]) {
                         } else if (i == 1) {
                             std::cout << "Charger clicked" << std::endl;
                         } else if (i == 2) {
-                            std::cout << "Parametre clicked" << std::endl;
+                            showSettings(window, renderer, width, height, targetFPS, language);
+                            updateButtons();
                         } else if (i == 3) {
                             running = false; // Quitter button
                         }
@@ -121,6 +130,9 @@ int main(int argc, char* argv[]) {
         }
 
         SDL_RenderPresent(renderer);
+        Uint32 frameTime = SDL_GetTicks() - frameStart;
+        Uint32 delay = 1000 / static_cast<Uint32>(targetFPS);
+        if (frameTime < delay) SDL_Delay(delay - frameTime);
     }
 
     for (auto& b : buttons) {
