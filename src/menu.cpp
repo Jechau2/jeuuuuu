@@ -55,6 +55,14 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
     if (SDL_Surface* surf = SDL_LoadBMP(bgPath.c_str())) {
         background = SDL_CreateTextureFromSurface(renderer, surf);
         SDL_FreeSurface(surf);
+        if (background) {
+            std::cout << "Menu background loaded." << std::endl;
+        } else {
+            std::cerr << "Failed to create background texture from " << bgPath
+                      << std::endl;
+        }
+    } else {
+        std::cerr << "Failed to load background image: " << bgPath << std::endl;
     }
 
     std::vector<Button> buttons;
