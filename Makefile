@@ -1,9 +1,10 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra
+
 SDL_CFLAGS := $(shell pkg-config --cflags sdl2 SDL2_ttf)
 SDL_LIBS := $(shell pkg-config --libs sdl2 SDL2_ttf)
 MINER_SRCS := src/mine.cpp src/miner_main.cpp
-SRCS := $(filter-out $(MINER_SRCS), $(wildcard src/*.cpp))
+
 OBJS := $(patsubst src/%.cpp, build/%.o, $(SRCS))
 MINER_OBJS := $(patsubst src/%.cpp, build/%.o, $(MINER_SRCS))
 TARGET := bin/arme_fatal

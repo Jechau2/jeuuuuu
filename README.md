@@ -1,11 +1,12 @@
 # jeuuuuu
 
-Simple SDL2/SDL2_ttf project example.
+Simple SDL2/SDL2_ttf/SDL2_image project example.
 
 ## Requirements
 
 - SDL2
 - SDL2_ttf
+- SDL2_image
 - Make
 
 ## Build
@@ -60,7 +61,8 @@ generate text using a local TinyLlama model.
 
 2. Place the `TinyLlama.Q4_0.gguf` model in the `models/` directory.
 
-For menu customization, add a BMP image at `assets/backgrounds/menu.bmp`.
+For menu customization, place your background image as `assets/backgrounds/menu.png`.
+If absent, the game falls back to `assets/backgrounds/menu.bmp`.
 
 The game calls the script at runtime to obtain generated text.
 

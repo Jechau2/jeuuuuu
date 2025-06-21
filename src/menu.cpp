@@ -1,6 +1,7 @@
 #include "menu.h"
 #include "jeu.h"
 #include "parametre.h"
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <string>
@@ -50,19 +51,30 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
         return 1;
     }
 
+    int imgFlags = IMG_INIT_PNG;
+    bool pngInit = (IMG_Init(imgFlags) & imgFlags) != 0;
+    if (!pngInit) {
+        std::cerr << "Failed to init SDL_image: " << IMG_GetError() << std::endl;
+    }
+
     SDL_Texture* background = nullptr;
-    const std::string bgPath = "assets/backgrounds/menu.bmp";
-    if (SDL_Surface* surf = SDL_LoadBMP(bgPath.c_str())) {
+    const std::string pngPath = "assets/backgrounds/menu.png";
+    const std::string bmpPath = "assets/backgrounds/menu.bmp";
+    SDL_Surface* surf = nullptr;
+    if (pngInit)
+        surf = IMG_Load(pngPath.c_str());
+    if (!surf)
+        surf = SDL_LoadBMP(bmpPath.c_str());
+    if (surf) {
         background = SDL_CreateTextureFromSurface(renderer, surf);
         SDL_FreeSurface(surf);
         if (background) {
             std::cout << "Menu background loaded." << std::endl;
         } else {
-            std::cerr << "Failed to create background texture from " << bgPath
-                      << std::endl;
+            std::cerr << "Failed to create background texture from image" << std::endl;
         }
     } else {
-        std::cerr << "Failed to load background image: " << bgPath << std::endl;
+        std::cerr << "Failed to load background image" << std::endl;
     }
 
     std::vector<Button> buttons;
@@ -153,5 +165,7 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
     if (background)
         SDL_DestroyTexture(background);
     TTF_CloseFont(font);
+    if (pngInit)
+        IMG_Quit();
     return 0;
 }
