@@ -1,10 +1,10 @@
 #include "menu.h"
-#include "parametre.h"
 #include "jeu.h"
+#include "parametre.h"
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 /**
  * @brief Représente un bouton cliquable dans le menu.
@@ -42,12 +42,19 @@ static bool pointInRect(int x, int y, const SDL_Rect& r) {
  * @return 0 si l'utilisateur quitte normalement.
  */
 int showMenu(SDL_Window* window, SDL_Renderer* renderer,
-             int &width, int &height, int &targetFPS, std::string &language) {
+             int& width, int& height, int& targetFPS, std::string& language) {
     std::string fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
     TTF_Font* font = TTF_OpenFont(fontPath.c_str(), 24);
     if (!font) {
         std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
         return 1;
+    }
+
+    SDL_Texture* background = nullptr;
+    const std::string bgPath = "assets/backgrounds/menu.bmp";
+    if (SDL_Surface* surf = SDL_LoadBMP(bgPath.c_str())) {
+        background = SDL_CreateTextureFromSurface(renderer, surf);
+        SDL_FreeSurface(surf);
     }
 
     std::vector<Button> buttons;
@@ -68,7 +75,7 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
                 SDL_DestroyTexture(b.texture);
                 b.texture = nullptr;
             }
-            SDL_Surface* surf = TTF_RenderUTF8_Blended(font, b.label.c_str(), SDL_Color{255,255,255,255});
+            SDL_Surface* surf = TTF_RenderUTF8_Blended(font, b.label.c_str(), SDL_Color{255, 255, 255, 255});
             if (surf) {
                 b.texture = SDL_CreateTextureFromSurface(renderer, surf);
                 SDL_FreeSurface(surf);
@@ -108,6 +115,10 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+        if (background) {
+            SDL_Rect dst{0, 0, width, height};
+            SDL_RenderCopy(renderer, background, nullptr, &dst);
+        }
 
         for (const auto& b : buttons) {
             SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
@@ -123,13 +134,16 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
         SDL_RenderPresent(renderer);
         Uint32 frameTime = SDL_GetTicks() - frameStart;
         Uint32 delay = 1000 / static_cast<Uint32>(targetFPS);
-        if (frameTime < delay) SDL_Delay(delay - frameTime);
+        if (frameTime < delay)
+            SDL_Delay(delay - frameTime);
     }
 
     for (auto& b : buttons) {
-        if (b.texture) SDL_DestroyTexture(b.texture);
+        if (b.texture)
+            SDL_DestroyTexture(b.texture);
     }
+    if (background)
+        SDL_DestroyTexture(background);
     TTF_CloseFont(font);
     return 0;
 }
-

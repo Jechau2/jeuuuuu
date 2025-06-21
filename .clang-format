@@ -1,0 +1,7 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+PointerAlignment: Left
+DerivePointerAlignment: false
+AccessModifierOffset: 0
+IndentAccessModifiers: false
+ColumnLimit: 0
