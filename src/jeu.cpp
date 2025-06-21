@@ -1,10 +1,11 @@
 #include "jeu.h"
-#include "ui_helpers.h"
-#include "inventory.h"
 #include "GameAI.h"
+#include "currency.h"
+#include "inventory.h"
+#include "ui_helpers.h"
 #include <SDL2/SDL_ttf.h>
-#include <string>
 #include <iostream>
+#include <string>
 
 /**
  * @brief Structure représentant le héros affiché dans l'interface.
@@ -19,6 +20,7 @@ struct Character {
     int agilite{10};
     int intelligence{10};
     Inventory inventaire;
+    Currency monnaie;
 };
 
 /**
@@ -35,8 +37,9 @@ struct Character {
 static void renderText(SDL_Renderer* renderer, TTF_Font* font,
                        const std::string& text, int x, int y) {
     SDL_Surface* surf = TTF_RenderUTF8_Blended(font, text.c_str(),
-                                               SDL_Color{255,255,255,255});
-    if (!surf) return;
+                                               SDL_Color{255, 255, 255, 255});
+    if (!surf)
+        return;
     SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
     SDL_Rect dst{x, y, surf->w, surf->h};
     SDL_FreeSurface(surf);
@@ -64,6 +67,7 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
     SDL_Rect invButton{panel.x + width - 150, panel.y + 10, 140, 30};
 
     Character hero;
+    hero.monnaie.addGold(1); // monnaie initiale
     hero.inventaire.addItem("Potion de soin");
     hero.inventaire.addItem("Epee en bois");
     hero.inventaire.addItem("Bouclier");
@@ -96,7 +100,8 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
                             std::string prompt = "Combine les objets suivants pour en creer un nouveau : ";
                             for (size_t i = 0; i < labItems.size(); ++i) {
                                 prompt += labItems[i];
-                                if (i + 1 < labItems.size()) prompt += ", ";
+                                if (i + 1 < labItems.size())
+                                    prompt += ", ";
                             }
                             std::string result = ai.generateObject(prompt);
                             if (!result.empty())
@@ -139,16 +144,28 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
 
         int x1 = panel.x + 10;
         int y = panel.y + 10;
-        renderText(renderer, font, "Nom: " + hero.nom, x1, y); y += 24;
-        renderText(renderer, font, "Niveau: " + std::to_string(hero.niveau), x1, y); y += 24;
-        renderText(renderer, font, "PV: " + std::to_string(hero.pv), x1, y); y += 24;
+        renderText(renderer, font, "Nom: " + hero.nom, x1, y);
+        y += 24;
+        renderText(renderer, font, "Niveau: " + std::to_string(hero.niveau), x1, y);
+        y += 24;
+        renderText(renderer, font, "PV: " + std::to_string(hero.pv), x1, y);
+        y += 24;
         renderText(renderer, font, "PM: " + std::to_string(hero.pm), x1, y);
+        y += 24;
+        std::string money = "Monnaie: " + std::to_string(hero.monnaie.platinum()) + "P " +
+                            std::to_string(hero.monnaie.gold()) + "G " +
+                            std::to_string(hero.monnaie.silver()) + "A " +
+                            std::to_string(hero.monnaie.bronze()) + "B";
+        renderText(renderer, font, money, x1, y);
 
         int x2 = panel.x + width / 2;
         y = panel.y + 10;
-        renderText(renderer, font, "Force: " + std::to_string(hero.force), x2, y); y += 24;
-        renderText(renderer, font, "Defense: " + std::to_string(hero.defense), x2, y); y += 24;
-        renderText(renderer, font, "Agilite: " + std::to_string(hero.agilite), x2, y); y += 24;
+        renderText(renderer, font, "Force: " + std::to_string(hero.force), x2, y);
+        y += 24;
+        renderText(renderer, font, "Defense: " + std::to_string(hero.defense), x2, y);
+        y += 24;
+        renderText(renderer, font, "Agilite: " + std::to_string(hero.agilite), x2, y);
+        y += 24;
         renderText(renderer, font, "Intelligence: " + std::to_string(hero.intelligence), x2, y);
 
         SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
@@ -175,7 +192,7 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
             SDL_RenderDrawRect(renderer, &labRect);
             renderText(renderer, font, "Lab", labRect.x + 5, labRect.y + 5);
             int ly = labRect.y + 30;
-            for (const auto &it : labItems) {
+            for (const auto& it : labItems) {
                 renderText(renderer, font, it, labRect.x + 20, ly);
                 ly += 24;
             }
@@ -193,7 +210,7 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
             int yy = labRect.y + labRect.h + 40;
             renderText(renderer, font, "Inventaire", invRect.x + 20, yy);
             yy += 30;
-            const auto &items = hero.inventaire.getItems();
+            const auto& items = hero.inventaire.getItems();
             for (size_t i = 0; i < items.size(); ++i) {
                 SDL_Rect r{invRect.x + 40, yy, invRect.w - 80, 24};
                 renderText(renderer, font, items[i], r.x, r.y);
@@ -211,4 +228,3 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
 
     TTF_CloseFont(font);
 }
-
