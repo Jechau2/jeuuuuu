@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include "menu.h"
@@ -46,7 +47,11 @@ int main(int argc, char* argv[]) {
     }
 
     // Demonstration of the AI integration
-    GameAI ai;
+    std::filesystem::path exePath = std::filesystem::absolute(argv[0]);
+    std::filesystem::path scriptPath = (exePath.parent_path() / ".." / "scripts" /
+                                       "ai_prompt.py")
+                                          .lexically_normal();
+    GameAI ai(scriptPath.string());
     std::string response = ai.generateObject("Cr\xC3\xA9e un objet magique pour un jeu en C++");
     std::cout << "GameAI: " << response << std::endl;
 
