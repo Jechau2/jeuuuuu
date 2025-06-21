@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "menu.h"
+#include "GameAI.h"
 
 /**
  * @brief Point d'entrée de l'application.
@@ -43,6 +44,11 @@ int main(int argc, char* argv[]) {
         SDL_Quit();
         return 1;
     }
+
+    // Demonstration of the AI integration
+    GameAI ai;
+    std::string response = ai.generateObject("Cr\xC3\xA9e un objet magique pour un jeu en C++");
+    std::cout << "GameAI: " << response << std::endl;
 
     int result = showMenu(window, renderer, width, height, targetFPS, language);
 
