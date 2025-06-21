@@ -3,6 +3,9 @@
 #include <string>
 #include <iostream>
 
+/**
+ * @brief Structure représentant le héros affiché dans l'interface.
+ */
 struct Character {
     std::string nom{"H\xC3\xA9ros"};
     int niveau{1};
@@ -14,6 +17,17 @@ struct Character {
     int intelligence{10};
 };
 
+/**
+ * @brief Rend un texte à l'écran.
+ *
+ * Crée une texture à partir du texte fourni et l'affiche à la position donnée.
+ *
+ * @param renderer Contexte SDL de rendu.
+ * @param font     Police utilisée pour le texte.
+ * @param text     Chaîne à afficher.
+ * @param x        Position horizontale.
+ * @param y        Position verticale.
+ */
 static void renderText(SDL_Renderer* renderer, TTF_Font* font,
                        const std::string& text, int x, int y) {
     SDL_Surface* surf = TTF_RenderUTF8_Blended(font, text.c_str(),
@@ -28,6 +42,16 @@ static void renderText(SDL_Renderer* renderer, TTF_Font* font,
     }
 }
 
+/**
+ * @brief Boucle principale d'affichage du jeu.
+ *
+ * Affiche les statistiques du personnage et gère les entrées clavier pour
+ * quitter la vue. Cette fonction bloque jusqu'à ce que l'utilisateur ferme la
+ * fenêtre ou appuie sur Echap.
+ *
+ * @param window   Fenêtre SDL où afficher le jeu.
+ * @param renderer Rendu associé à cette fenêtre.
+ */
 void showGame(SDL_Window* window, SDL_Renderer* renderer) {
     int width, height;
     SDL_GetWindowSize(window, &width, &height);

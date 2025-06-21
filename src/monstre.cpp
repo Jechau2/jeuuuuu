@@ -1,6 +1,9 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief Décrit un monstre rencontré dans le jeu.
+ */
 class Monstre {
 public:
     // Basic attributes
@@ -18,6 +21,18 @@ public:
     int orDonne;
     std::vector<int> lootIds;
 
+    /**
+     * @brief Constructeur d'un monstre.
+     *
+     * @param nomInit       Nom du monstre.
+     * @param niveauInit    Niveau initial.
+     * @param pvInit        Points de vie de départ.
+     * @param forceInit     Valeur de force initiale.
+     * @param defenseInit   Valeur de défense initiale.
+     * @param agiliteInit   Valeur d'agilité initiale.
+     * @param xpDonnee      Expérience donnée à la mort.
+     * @param orDonneInit   Quantité d'or donnée.
+     */
     Monstre(const std::string& nomInit,
             int niveauInit = 1,
             int pvInit = 50,
@@ -35,7 +50,16 @@ public:
           experienceDonnee(xpDonnee),
           orDonne(orDonneInit) {}
 
+    /**
+     * @brief Vérifie si le monstre est encore en vie.
+     * @return true si ses points de vie sont supérieurs à 0.
+     */
     bool estVivant() const { return pointsDeVie > 0; }
+
+    /**
+     * @brief Applique des dégâts au monstre.
+     * @param degats Nombre de points à retirer.
+     */
     void subirDegats(int degats) { pointsDeVie -= degats; if (pointsDeVie < 0) pointsDeVie = 0; }
 };
 

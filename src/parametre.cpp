@@ -4,6 +4,20 @@
 #include <vector>
 #include <iostream>
 
+/**
+ * @brief Affiche et gère le menu des paramètres.
+ *
+ * Ce menu permet à l'utilisateur de choisir la langue, la résolution de la
+ * fenêtre et la cadence d'images par seconde.
+ * Les valeurs sélectionnées sont renvoyées via les références.
+ *
+ * @param window   Fenêtre SDL.
+ * @param renderer Contexte de rendu.
+ * @param width    Largeur de fenêtre à mettre à jour.
+ * @param height   Hauteur de fenêtre à mettre à jour.
+ * @param fps      FPS choisi par l'utilisateur.
+ * @param language Langue sélectionnée.
+ */
 void showSettings(SDL_Window* window, SDL_Renderer* renderer,
                   int &width, int &height, int &fps, std::string &language) {
     std::vector<std::string> languages = {"Francais", "English"};
