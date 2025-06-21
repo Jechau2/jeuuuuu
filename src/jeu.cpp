@@ -1,25 +1,12 @@
 #include "jeu.h"
-#include "ui_helpers.h"
-#include "inventory.h"
 #include "GameAI.h"
+#include "character.h"
+#include "inventory.h"
+#include "save_system.h"
+#include "ui_helpers.h"
 #include <SDL2/SDL_ttf.h>
-#include <string>
 #include <iostream>
-
-/**
- * @brief Structure représentant le héros affiché dans l'interface.
- */
-struct Character {
-    std::string nom{"H\xC3\xA9ros"};
-    int niveau{1};
-    int pv{100};
-    int pm{50};
-    int force{10};
-    int defense{10};
-    int agilite{10};
-    int intelligence{10};
-    Inventory inventaire;
-};
+#include <string>
 
 /**
  * @brief Rend un texte à l'écran.
@@ -35,8 +22,9 @@ struct Character {
 static void renderText(SDL_Renderer* renderer, TTF_Font* font,
                        const std::string& text, int x, int y) {
     SDL_Surface* surf = TTF_RenderUTF8_Blended(font, text.c_str(),
-                                               SDL_Color{255,255,255,255});
-    if (!surf) return;
+                                               SDL_Color{255, 255, 255, 255});
+    if (!surf)
+        return;
     SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
     SDL_Rect dst{x, y, surf->w, surf->h};
     SDL_FreeSurface(surf);
@@ -56,17 +44,18 @@ static void renderText(SDL_Renderer* renderer, TTF_Font* font,
  * @param window   Fenêtre SDL où afficher le jeu.
  * @param renderer Rendu associé à cette fenêtre.
  */
-void showGame(SDL_Window* window, SDL_Renderer* renderer) {
+void showGame(SDL_Window* window, SDL_Renderer* renderer, Character& hero) {
     int width, height;
     SDL_GetWindowSize(window, &width, &height);
     int panelH = height / 3;
     SDL_Rect panel{0, height - panelH, width, panelH};
     SDL_Rect invButton{panel.x + width - 150, panel.y + 10, 140, 30};
 
-    Character hero;
-    hero.inventaire.addItem("Potion de soin");
-    hero.inventaire.addItem("Epee en bois");
-    hero.inventaire.addItem("Bouclier");
+    if (hero.inventaire.getItems().empty()) {
+        hero.inventaire.addItem("Potion de soin");
+        hero.inventaire.addItem("Epee en bois");
+        hero.inventaire.addItem("Bouclier");
+    }
     std::vector<std::string> labItems;
     GameAI ai;
     std::string fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
@@ -96,7 +85,8 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
                             std::string prompt = "Combine les objets suivants pour en creer un nouveau : ";
                             for (size_t i = 0; i < labItems.size(); ++i) {
                                 prompt += labItems[i];
-                                if (i + 1 < labItems.size()) prompt += ", ";
+                                if (i + 1 < labItems.size())
+                                    prompt += ", ";
                             }
                             std::string result = ai.generateObject(prompt);
                             if (!result.empty())
@@ -118,9 +108,14 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
             } else {
                 if (e.type == SDL_QUIT)
                     running = false;
-                else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
-                    running = false;
-                else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                else if (e.type == SDL_KEYDOWN) {
+                    if (e.key.keysym.sym == SDLK_ESCAPE)
+                        running = false;
+                    else if (e.key.keysym.sym == SDLK_s)
+                        saveCharacter(hero, "savegame.txt");
+                    else if (e.key.keysym.sym == SDLK_l)
+                        loadCharacter(hero, "savegame.txt");
+                } else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                     int mx = e.button.x;
                     int my = e.button.y;
                     if (pointInRect(mx, my, invButton))
@@ -139,16 +134,22 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
 
         int x1 = panel.x + 10;
         int y = panel.y + 10;
-        renderText(renderer, font, "Nom: " + hero.nom, x1, y); y += 24;
-        renderText(renderer, font, "Niveau: " + std::to_string(hero.niveau), x1, y); y += 24;
-        renderText(renderer, font, "PV: " + std::to_string(hero.pv), x1, y); y += 24;
+        renderText(renderer, font, "Nom: " + hero.nom, x1, y);
+        y += 24;
+        renderText(renderer, font, "Niveau: " + std::to_string(hero.niveau), x1, y);
+        y += 24;
+        renderText(renderer, font, "PV: " + std::to_string(hero.pv), x1, y);
+        y += 24;
         renderText(renderer, font, "PM: " + std::to_string(hero.pm), x1, y);
 
         int x2 = panel.x + width / 2;
         y = panel.y + 10;
-        renderText(renderer, font, "Force: " + std::to_string(hero.force), x2, y); y += 24;
-        renderText(renderer, font, "Defense: " + std::to_string(hero.defense), x2, y); y += 24;
-        renderText(renderer, font, "Agilite: " + std::to_string(hero.agilite), x2, y); y += 24;
+        renderText(renderer, font, "Force: " + std::to_string(hero.force), x2, y);
+        y += 24;
+        renderText(renderer, font, "Defense: " + std::to_string(hero.defense), x2, y);
+        y += 24;
+        renderText(renderer, font, "Agilite: " + std::to_string(hero.agilite), x2, y);
+        y += 24;
         renderText(renderer, font, "Intelligence: " + std::to_string(hero.intelligence), x2, y);
 
         SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
@@ -175,7 +176,7 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
             SDL_RenderDrawRect(renderer, &labRect);
             renderText(renderer, font, "Lab", labRect.x + 5, labRect.y + 5);
             int ly = labRect.y + 30;
-            for (const auto &it : labItems) {
+            for (const auto& it : labItems) {
                 renderText(renderer, font, it, labRect.x + 20, ly);
                 ly += 24;
             }
@@ -193,7 +194,7 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
             int yy = labRect.y + labRect.h + 40;
             renderText(renderer, font, "Inventaire", invRect.x + 20, yy);
             yy += 30;
-            const auto &items = hero.inventaire.getItems();
+            const auto& items = hero.inventaire.getItems();
             for (size_t i = 0; i < items.size(); ++i) {
                 SDL_Rect r{invRect.x + 40, yy, invRect.w - 80, 24};
                 renderText(renderer, font, items[i], r.x, r.y);
@@ -209,6 +210,6 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
         SDL_Delay(16);
     }
 
+    saveCharacter(hero, "savegame.txt");
     TTF_CloseFont(font);
 }
-
