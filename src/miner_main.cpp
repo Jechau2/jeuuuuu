@@ -2,6 +2,13 @@
 #include <iostream>
 #include <vector>
 
+/**
+ * @brief Petit programme d'extraction en ligne de commande.
+ */
+
+/**
+ * Point d'entrée du mini-jeu de mine.
+ */
 int main() {
     Outil pioche{"Pioche rudimentaire", 5, 1};
     Joueur joueur(pioche);

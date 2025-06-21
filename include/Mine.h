@@ -7,11 +7,18 @@
 
 #include "Random.h"
 
-// Enumeration of ores for future extension
-enum class TypeMinerai { Fer,
-                         Or,
-                         Argent };
+/**
+ * @brief Types de minerai disponibles.
+ */
+enum class TypeMinerai {
+    Fer,
+    Or,
+    Argent
+};
 
+/**
+ * @brief Convertit un type de minerai en chaîne.
+ */
 inline std::string toString(TypeMinerai type) {
     switch (type) {
     case TypeMinerai::Fer:
@@ -23,6 +30,9 @@ inline std::string toString(TypeMinerai type) {
     }
 }
 
+/**
+ * @brief Décrit un outil utilisé pour l'extraction.
+ */
 struct Outil {
     std::string nom;
     int durabilite{0};
@@ -34,7 +44,15 @@ class ZoneMinerai;
 class Joueur {
     public:
     explicit Joueur(Outil outil) : outilActif(std::move(outil)) {}
+
+    /**
+     * @brief Tente d'extraire du minerai depuis une zone.
+     */
     void extraire(ZoneMinerai& zone);
+
+    /**
+     * @brief Affiche le contenu de l'inventaire du joueur.
+     */
     void afficherStatut() const;
 
     std::map<std::string, int> ressources;
@@ -47,6 +65,9 @@ class ZoneMinerai {
         : nom(std::move(n)), typeMinerai(t), difficulte(diff),
           stockInitial(stockInit), stock(stockInit) {}
 
+    /**
+     * @brief Effectue une tentative d'extraction.
+     */
     bool extraire(Joueur& joueur, int rng);
 
     std::string nom;

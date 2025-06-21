@@ -2,6 +2,9 @@
 #include <chrono>
 #include <thread>
 
+/**
+ * @brief Affiche une barre de progression simple dans la console.
+ */
 static void showProgress() {
     const int barWidth = 20;
     for (int i = 0; i < barWidth; ++i) {
@@ -13,6 +16,9 @@ static void showProgress() {
     std::cout << std::endl;
 }
 
+/**
+ * @brief Tente d'extraire du minerai depuis la zone indiquée.
+ */
 void Joueur::extraire(ZoneMinerai& zone) {
     if (outilActif.durabilite <= 0) {
         std::cout << "Votre outil est cass\xC3\xA9 !\n";
@@ -30,6 +36,9 @@ void Joueur::extraire(ZoneMinerai& zone) {
     }
 }
 
+/**
+ * @brief Affiche l'inventaire du joueur.
+ */
 void Joueur::afficherStatut() const {
     std::cout << "Outil: " << outilActif.nom
               << " (durabilit\xC3\xA9: " << outilActif.durabilite << ")\n";
@@ -42,6 +51,9 @@ void Joueur::afficherStatut() const {
     }
 }
 
+/**
+ * @brief Réalise l'extraction en fonction d'un tirage aléatoire.
+ */
 bool ZoneMinerai::extraire(Joueur& joueur, int rng) {
     if (stock <= 0) {
         std::cout << "La zone est \xC3\xA9puis\xC3\xA9e.\n";
