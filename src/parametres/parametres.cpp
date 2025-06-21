@@ -1,4 +1,4 @@
-#include "parametre.h"
+#include "parametres.h"
 #include <SDL2/SDL_ttf.h>
 #include <vector>
 #include <iostream>

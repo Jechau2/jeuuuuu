@@ -3,7 +3,7 @@ CXXFLAGS = -std=c++17 $(shell sdl2-config --cflags) $(shell pkg-config --cflags 
 LDFLAGS = $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_ttf)
 
 TARGET = jeuuuuu
-SOURCES = $(wildcard src/*.cpp)
+SOURCES = $(wildcard src/*.cpp) $(wildcard src/parametres/*.cpp)
 
 all: $(TARGET)
 
