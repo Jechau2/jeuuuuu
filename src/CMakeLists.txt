@@ -5,6 +5,7 @@ set(SOURCES
     menu.cpp
     monstre.cpp
     objet.cpp
+    GameAI.cpp
     parametre.cpp
     personage.cpp
     ui_helpers.cpp
