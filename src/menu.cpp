@@ -6,16 +6,41 @@
 #include <vector>
 #include <string>
 
+/**
+ * @brief Représente un bouton cliquable dans le menu.
+ */
 struct Button {
     SDL_Rect rect;
     std::string label;
     SDL_Texture* texture{nullptr};
 };
 
+/**
+ * @brief Vérifie si un point se situe à l'intérieur d'un rectangle.
+ *
+ * @param x Coordonnée X du point.
+ * @param y Coordonnée Y du point.
+ * @param r Rectangle à tester.
+ * @return true si le point est dans le rectangle.
+ */
 static bool pointInRect(int x, int y, const SDL_Rect& r) {
     return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 }
 
+/**
+ * @brief Boucle d'affichage du menu principal.
+ *
+ * Crée les différents boutons et gère les interactions utilisateur afin de
+ * lancer le jeu, charger une partie, ouvrir les paramètres ou quitter.
+ *
+ * @param window     Fenêtre SDL où dessiner le menu.
+ * @param renderer   Contexte de rendu utilisé.
+ * @param width      Largeur de fenêtre (peut être modifiée par les paramètres).
+ * @param height     Hauteur de fenêtre (idem).
+ * @param targetFPS  FPS cible pour la temporisation.
+ * @param language   Langue actuelle de l'interface.
+ * @return 0 si l'utilisateur quitte normalement.
+ */
 int showMenu(SDL_Window* window, SDL_Renderer* renderer,
              int &width, int &height, int &targetFPS, std::string &language) {
     std::string fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";

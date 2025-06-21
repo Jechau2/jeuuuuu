@@ -1,10 +1,16 @@
 #include "ui_helpers.h"
 #include <iostream>
 
+/**
+ * @brief Indique si un point appartient à un rectangle.
+ */
 bool pointInRect(int x, int y, const SDL_Rect& r) {
     return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 }
 
+/**
+ * @brief Rend une option de menu texte.
+ */
 void renderOption(SDL_Renderer* renderer, TTF_Font* font,
                   const std::string& text, int x, int y, bool selected,
                   SDL_Rect* outRect) {
@@ -25,6 +31,9 @@ void renderOption(SDL_Renderer* renderer, TTF_Font* font,
     }
 }
 
+/**
+ * @brief Rend une option de type slider contenant plusieurs valeurs.
+ */
 void renderSliderOption(SDL_Renderer* renderer, TTF_Font* font,
                         const std::string& label,
                         const std::vector<std::string>& options,

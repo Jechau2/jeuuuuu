@@ -4,6 +4,12 @@
 #include <string>
 #include "menu.h"
 
+/**
+ * @brief Point d'entrée de l'application.
+ *
+ * Initialise SDL et SDL_ttf, crée la fenêtre principale puis lance le menu.
+ * Les ressources sont libérées avant la sortie du programme.
+ */
 int main(int argc, char* argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;

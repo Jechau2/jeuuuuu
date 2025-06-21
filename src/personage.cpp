@@ -1,6 +1,9 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief Représente un personnage joueur ou non joueur.
+ */
 class Personage {
 public:
     // Basic attributes
@@ -20,6 +23,13 @@ public:
     int armeEquipped;
     int armureEquipped;
 
+    /**
+     * @brief Constructeur d'un personnage.
+     * @param nomInit      Nom du personnage.
+     * @param niveauInit   Niveau initial.
+     * @param pv           Points de vie de départ.
+     * @param pm           Points de magie de départ.
+     */
     Personage(const std::string& nomInit,
               int niveauInit = 1,
               int pv = 100,
