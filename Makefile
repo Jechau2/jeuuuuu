@@ -2,9 +2,12 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra
 SDL_CFLAGS := $(shell pkg-config --cflags sdl2 SDL2_ttf)
 SDL_LIBS := $(shell pkg-config --libs sdl2 SDL2_ttf)
-SRCS := $(wildcard src/*.cpp)
+MINER_SRCS := src/mine.cpp src/miner_main.cpp
+SRCS := $(filter-out $(MINER_SRCS), $(wildcard src/*.cpp))
 OBJS := $(patsubst src/%.cpp, build/%.o, $(SRCS))
+MINER_OBJS := $(patsubst src/%.cpp, build/%.o, $(MINER_SRCS))
 TARGET := bin/arme_fatal
+MINER_TARGET := bin/mine_game
 
 all: $(TARGET)
 
@@ -16,10 +19,16 @@ $(TARGET): $(OBJS)
 	@mkdir -p bin
 	$(CXX) $(OBJS) $(SDL_LIBS) -o $@
 
+$(MINER_TARGET): $(MINER_OBJS)
+	@mkdir -p bin
+	$(CXX) $(MINER_OBJS) -o $@
+
 clean:
-	rm -rf build $(TARGET)
+	rm -rf build $(TARGET) $(MINER_TARGET)
 
 run: $(TARGET)
 	$(TARGET)
 
-.PHONY: all clean run
+miner_run: $(MINER_TARGET)
+	$(MINER_TARGET)
+.PHONY: all clean run miner_run
