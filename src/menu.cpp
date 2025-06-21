@@ -52,9 +52,18 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
 
     SDL_Texture* background = nullptr;
     const std::string bgPath = "assets/backgrounds/menu.bmp";
+    bool bgDisplayedLogged = false;
     if (SDL_Surface* surf = SDL_LoadBMP(bgPath.c_str())) {
         background = SDL_CreateTextureFromSurface(renderer, surf);
         SDL_FreeSurface(surf);
+        if (background) {
+            std::cout << "Menu background loaded from " << bgPath << std::endl;
+        } else {
+            std::cerr << "Failed to create background texture: "
+                      << SDL_GetError() << std::endl;
+        }
+    } else {
+        std::cout << "No background image found at " << bgPath << std::endl;
     }
 
     std::vector<Button> buttons;
@@ -118,6 +127,13 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
         if (background) {
             SDL_Rect dst{0, 0, width, height};
             SDL_RenderCopy(renderer, background, nullptr, &dst);
+            if (!bgDisplayedLogged) {
+                std::cout << "Menu background displayed" << std::endl;
+                bgDisplayedLogged = true;
+            }
+        } else if (!bgDisplayedLogged) {
+            std::cout << "Menu background not displayed" << std::endl;
+            bgDisplayedLogged = true;
         }
 
         for (const auto& b : buttons) {
