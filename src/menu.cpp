@@ -83,6 +83,9 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
     int startY = 150;
     int spacing = 20;
 
+    /**
+     * @brief Met à jour la texture des boutons en fonction de la taille de la fenêtre.
+     */
     auto updateButtons = [&]() {
         int centerX = (width - btnW) / 2;
         buttons.clear();

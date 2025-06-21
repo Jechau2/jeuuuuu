@@ -5,25 +5,33 @@
 #include <string>
 
 namespace {
-std::string escapeQuotes(const std::string &in) {
+
+/**
+ * @brief Échappe les guillemets d'une chaîne pour l'appel shell.
+ */
+std::string escapeQuotes(const std::string& in) {
     std::string out;
     out.reserve(in.size());
     for (char c : in) {
-        if (c == '"') out += '\\';
+        if (c == '"')
+            out += '\\';
         out += c;
     }
     return out;
 }
-}
+} // namespace
 
-GameAI::GameAI(const std::string &script) : scriptPath(script) {}
+GameAI::GameAI(const std::string& script) : scriptPath(script) {}
 
-std::string GameAI::generateObject(const std::string &prompt) {
+/**
+ * @brief Lance le script Python pour générer du texte.
+ */
+std::string GameAI::generateObject(const std::string& prompt) {
     std::string cmd = "python3 \"" + scriptPath + "\" \"" + escapeQuotes(prompt) + "\"";
 
     std::array<char, 128> buffer{};
     std::string result;
-    FILE *pipe = popen(cmd.c_str(), "r");
+    FILE* pipe = popen(cmd.c_str(), "r");
     if (!pipe)
         return "Error: cannot run Python script";
     while (fgets(buffer.data(), buffer.size(), pipe)) {
