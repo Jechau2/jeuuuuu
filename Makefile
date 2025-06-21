@@ -1,12 +1,25 @@
-.PHONY: all build run clean
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra
+SDL_CFLAGS := $(shell pkg-config --cflags sdl2 SDL2_ttf)
+SDL_LIBS := $(shell pkg-config --libs sdl2 SDL2_ttf)
+SRCS := $(wildcard src/*.cpp)
+OBJS := $(patsubst src/%.cpp, build/%.o, $(SRCS))
+TARGET := bin/arme_fatal
 
-all: build
+all: $(TARGET)
 
-build:
-	./scripts/build.sh
+build/%.o: src/%.cpp
+	@mkdir -p build
+	$(CXX) $(CXXFLAGS) $(SDL_CFLAGS) -Iinclude -c $< -o $@
 
-run:
-	./scripts/run.sh
+$(TARGET): $(OBJS)
+	@mkdir -p bin
+	$(CXX) $(OBJS) $(SDL_LIBS) -o $@
 
 clean:
-	rm -rf build bin
+	rm -rf build $(TARGET)
+
+run: $(TARGET)
+	$(TARGET)
+
+.PHONY: all clean run

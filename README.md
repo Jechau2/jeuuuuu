@@ -6,20 +6,20 @@ Simple SDL2/SDL2_ttf project example.
 
 - SDL2
 - SDL2_ttf
-- CMake 3.10+
+- Make
 
 ## Build
 
 ```sh
-./scripts/build.sh [Debug|Release]
+make
 ```
 
-Artifacts are placed in `build/` and the executable in `bin/jeuuuuu`.
+Artifacts are placed in `build/` and the executable in `bin/arme_fatal`.
 
 ## Run
 
 ```sh
-./scripts/run.sh
+make run
 ```
 
 ## Lint
@@ -32,7 +32,7 @@ Artifacts are placed in `build/` and the executable in `bin/jeuuuuu`.
 
 ```
 bin/          - built executable
-build/        - CMake build directory (ignored)
+build/        - build directory (ignored)
 include/      - public headers
 lib/          - external libraries (optional)
 scripts/      - helper scripts
