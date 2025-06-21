@@ -37,6 +37,7 @@ include/      - public headers
 lib/          - external libraries (optional)
 scripts/      - helper scripts
 src/          - source files
+assets/       - game assets such as menu backgrounds
 ```
 
 ## AI Integration
@@ -58,6 +59,8 @@ generate text using a local TinyLlama model.
    ```
 
 2. Place the `TinyLlama.Q4_0.gguf` model in the `models/` directory.
+
+For menu customization, add a BMP image at `assets/backgrounds/menu.bmp`.
 
 The game calls the script at runtime to obtain generated text.
 
