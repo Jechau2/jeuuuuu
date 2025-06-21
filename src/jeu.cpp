@@ -1,6 +1,7 @@
 #include "jeu.h"
 #include "ui_helpers.h"
 #include "inventory.h"
+#include "GameAI.h"
 #include <SDL2/SDL_ttf.h>
 #include <string>
 #include <iostream>
@@ -66,6 +67,8 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
     hero.inventaire.addItem("Potion de soin");
     hero.inventaire.addItem("Epee en bois");
     hero.inventaire.addItem("Bouclier");
+    std::vector<std::string> labItems;
+    GameAI ai;
     std::string fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
     TTF_Font* font = TTF_OpenFont(fontPath.c_str(), 20);
     if (!font) {
@@ -76,11 +79,42 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
     bool running = true;
     bool inventoryOpen = false;
     SDL_Event e;
+    SDL_Rect invRect{50, 50, width - 100, height - 100};
+    SDL_Rect labRect{invRect.x + 20, invRect.y + 20, invRect.w - 40, 80};
+    SDL_Rect searchBtn{labRect.x + labRect.w - 110, labRect.y + labRect.h + 10, 100, 30};
+    std::vector<SDL_Rect> itemRects;
     while (running) {
         while (SDL_PollEvent(&e)) {
             if (inventoryOpen) {
                 if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
                     inventoryOpen = false;
+                else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                    int mx = e.button.x;
+                    int my = e.button.y;
+                    if (pointInRect(mx, my, searchBtn)) {
+                        if (!labItems.empty()) {
+                            std::string prompt = "Combine les objets suivants pour en creer un nouveau : ";
+                            for (size_t i = 0; i < labItems.size(); ++i) {
+                                prompt += labItems[i];
+                                if (i + 1 < labItems.size()) prompt += ", ";
+                            }
+                            std::string result = ai.generateObject(prompt);
+                            if (!result.empty())
+                                hero.inventaire.addItem(result);
+                            labItems.clear();
+                        }
+                    } else {
+                        for (size_t i = 0; i < itemRects.size(); ++i) {
+                            if (pointInRect(mx, my, itemRects[i])) {
+                                if (labItems.size() < 3) {
+                                    labItems.push_back(hero.inventaire.getItems()[i]);
+                                    hero.inventaire.removeItem(i);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
             } else {
                 if (e.type == SDL_QUIT)
                     running = false;
@@ -128,18 +162,45 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
                    invButton.y + (invButton.h - th) / 2);
 
         if (inventoryOpen) {
-            SDL_Rect invRect{50, 50, width - 100, height - 100};
+            itemRects.clear();
             SDL_SetRenderDrawColor(renderer, 20, 20, 20, 230);
             SDL_RenderFillRect(renderer, &invRect);
             SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
             SDL_RenderDrawRect(renderer, &invRect);
-            int yy = invRect.y + 20;
+
+            // Lab area
+            SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
+            SDL_RenderFillRect(renderer, &labRect);
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderDrawRect(renderer, &labRect);
+            renderText(renderer, font, "Lab", labRect.x + 5, labRect.y + 5);
+            int ly = labRect.y + 30;
+            for (const auto &it : labItems) {
+                renderText(renderer, font, it, labRect.x + 20, ly);
+                ly += 24;
+            }
+
+            // Search button
+            SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
+            SDL_RenderFillRect(renderer, &searchBtn);
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderDrawRect(renderer, &searchBtn);
+            TTF_SizeUTF8(font, "Recherche", &tw, &th);
+            renderText(renderer, font, "Recherche",
+                       searchBtn.x + (searchBtn.w - tw) / 2,
+                       searchBtn.y + (searchBtn.h - th) / 2);
+
+            int yy = labRect.y + labRect.h + 40;
             renderText(renderer, font, "Inventaire", invRect.x + 20, yy);
             yy += 30;
-            for (const std::string& item : hero.inventaire.getItems()) {
-                renderText(renderer, font, "- " + item, invRect.x + 40, yy);
+            const auto &items = hero.inventaire.getItems();
+            for (size_t i = 0; i < items.size(); ++i) {
+                SDL_Rect r{invRect.x + 40, yy, invRect.w - 80, 24};
+                renderText(renderer, font, items[i], r.x, r.y);
+                itemRects.push_back(r);
                 yy += 24;
             }
+
             renderText(renderer, font, "Echap pour fermer", invRect.x + 20,
                        invRect.y + invRect.h - 30);
         }
