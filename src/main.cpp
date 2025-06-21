@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "parametre.h"
+#include "jeu.h"
 
 struct Button {
     SDL_Rect rect;
@@ -101,7 +102,9 @@ int main(int argc, char* argv[]) {
                 for (size_t i = 0; i < buttons.size(); ++i) {
                     if (pointInRect(mx, my, buttons[i].rect)) {
                         if (i == 0) {
-                            std::cout << "Jouer clicked" << std::endl;
+                            Personage hero("Heros");
+                            showCharacterPage(window, renderer, hero);
+                            updateButtons();
                         } else if (i == 1) {
                             std::cout << "Charger clicked" << std::endl;
                         } else if (i == 2) {
