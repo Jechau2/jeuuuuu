@@ -1,4 +1,6 @@
 #include "jeu.h"
+#include "ui_helpers.h"
+#include "inventory.h"
 #include <SDL2/SDL_ttf.h>
 #include <string>
 #include <iostream>
@@ -15,6 +17,7 @@ struct Character {
     int defense{10};
     int agilite{10};
     int intelligence{10};
+    Inventory inventaire;
 };
 
 /**
@@ -57,8 +60,12 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
     SDL_GetWindowSize(window, &width, &height);
     int panelH = height / 3;
     SDL_Rect panel{0, height - panelH, width, panelH};
+    SDL_Rect invButton{panel.x + width - 150, panel.y + 10, 140, 30};
 
     Character hero;
+    hero.inventaire.addItem("Potion de soin");
+    hero.inventaire.addItem("Epee en bois");
+    hero.inventaire.addItem("Bouclier");
     std::string fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
     TTF_Font* font = TTF_OpenFont(fontPath.c_str(), 20);
     if (!font) {
@@ -67,13 +74,25 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
     }
 
     bool running = true;
+    bool inventoryOpen = false;
     SDL_Event e;
     while (running) {
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT)
-                running = false;
-            else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
-                running = false;
+            if (inventoryOpen) {
+                if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
+                    inventoryOpen = false;
+            } else {
+                if (e.type == SDL_QUIT)
+                    running = false;
+                else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
+                    running = false;
+                else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                    int mx = e.button.x;
+                    int my = e.button.y;
+                    if (pointInRect(mx, my, invButton))
+                        inventoryOpen = true;
+                }
+            }
         }
 
         SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
@@ -97,6 +116,33 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
         renderText(renderer, font, "Defense: " + std::to_string(hero.defense), x2, y); y += 24;
         renderText(renderer, font, "Agilite: " + std::to_string(hero.agilite), x2, y); y += 24;
         renderText(renderer, font, "Intelligence: " + std::to_string(hero.intelligence), x2, y);
+
+        SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
+        SDL_RenderFillRect(renderer, &invButton);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderDrawRect(renderer, &invButton);
+        int tw, th;
+        TTF_SizeUTF8(font, "Inventaire", &tw, &th);
+        renderText(renderer, font, "Inventaire",
+                   invButton.x + (invButton.w - tw) / 2,
+                   invButton.y + (invButton.h - th) / 2);
+
+        if (inventoryOpen) {
+            SDL_Rect invRect{50, 50, width - 100, height - 100};
+            SDL_SetRenderDrawColor(renderer, 20, 20, 20, 230);
+            SDL_RenderFillRect(renderer, &invRect);
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderDrawRect(renderer, &invRect);
+            int yy = invRect.y + 20;
+            renderText(renderer, font, "Inventaire", invRect.x + 20, yy);
+            yy += 30;
+            for (const std::string& item : hero.inventaire.getItems()) {
+                renderText(renderer, font, "- " + item, invRect.x + 40, yy);
+                yy += 24;
+            }
+            renderText(renderer, font, "Echap pour fermer", invRect.x + 20,
+                       invRect.y + invRect.h - 30);
+        }
 
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
