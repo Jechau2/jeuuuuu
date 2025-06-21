@@ -1,19 +1,12 @@
-CXX = g++
-CXXFLAGS = -std=c++17 $(shell sdl2-config --cflags) $(shell pkg-config --cflags SDL2_ttf)
-LDFLAGS = $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_ttf)
+.PHONY: all build run clean
 
-TARGET = jeuuuuu
-SOURCES = $(wildcard src/*.cpp)
+all: build
 
-all: $(TARGET)
+build:
+	./scripts/build.sh
 
-$(TARGET): $(SOURCES)
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $@ $(LDFLAGS)
+run:
+	./scripts/run.sh
 
 clean:
-	rm -f $(TARGET)
-
-makerun: $(TARGET)
-	./$(TARGET)
-
-.PHONY: all clean makerun
+	rm -rf build bin
