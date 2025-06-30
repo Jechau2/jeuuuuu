@@ -3,6 +3,7 @@
 
 #include "inventory.h"
 #include <string>
+#include <limits>
 
 struct Character {
     std::string nom{"H\xC3\xA9ros"};
@@ -13,6 +14,7 @@ struct Character {
     int defense{10};
     int agilite{10};
     int intelligence{10};
+    int sprite{0};
     Inventory inventaire;
 };
 

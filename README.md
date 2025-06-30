@@ -64,6 +64,9 @@ generate text using a local TinyLlama model.
 For menu customization, place your background image as `assets/backgrounds/menu.png`.
 If absent, the game falls back to `assets/backgrounds/menu.bmp`.
 
+To customize the hero, drop a 64×64 sprite sheet named
+`hero_sheet.png` in `assets/character_creator/`.
+
 The game calls the script at runtime to obtain generated text.
 
 ## Contributing

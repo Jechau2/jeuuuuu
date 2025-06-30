@@ -8,7 +8,7 @@ bool saveCharacter(const Character& hero, const std::string& filename) {
     ofs << hero.nom << '\n'
         << hero.niveau << ' ' << hero.pv << ' ' << hero.pm << ' '
         << hero.force << ' ' << hero.defense << ' ' << hero.agilite << ' '
-        << hero.intelligence << '\n';
+        << hero.intelligence << ' ' << hero.sprite << '\n';
     const auto& items = hero.inventaire.getItems();
     ofs << items.size() << '\n';
     for (const auto& it : items)
@@ -21,7 +21,7 @@ bool loadCharacter(Character& hero, const std::string& filename) {
     if (!ifs)
         return false;
     std::getline(ifs, hero.nom);
-    ifs >> hero.niveau >> hero.pv >> hero.pm >> hero.force >> hero.defense >> hero.agilite >> hero.intelligence;
+    ifs >> hero.niveau >> hero.pv >> hero.pm >> hero.force >> hero.defense >> hero.agilite >> hero.intelligence >> hero.sprite;
     ifs.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     size_t itemCount = 0;
     ifs >> itemCount;
