@@ -1,6 +1,7 @@
 #include "menu.h"
 #include "jeu.h"
 #include "parametre.h"
+#include "save_system.h"
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
@@ -121,10 +122,17 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
                 for (size_t i = 0; i < buttons.size(); ++i) {
                     if (pointInRect(mx, my, buttons[i].rect)) {
                         if (i == 0) {
-                            showGame(window, renderer);
+                            Character hero;
+                            showGame(window, renderer, hero);
                             updateButtons();
                         } else if (i == 1) {
-                            std::cout << "Charger clicked" << std::endl;
+                            Character hero;
+                            if (!loadCharacter(hero, "savegame.txt")) {
+                                std::cout << "Aucune sauvegarde.\n";
+                            } else {
+                                showGame(window, renderer, hero);
+                                updateButtons();
+                            }
                         } else if (i == 2) {
                             showSettings(window, renderer, width, height, targetFPS, language);
                             updateButtons();

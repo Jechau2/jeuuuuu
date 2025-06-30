@@ -1,27 +1,13 @@
 #include "jeu.h"
 #include "GameAI.h"
+#include "character.h"
 #include "currency.h"
 #include "inventory.h"
+#include "save_system.h"
 #include "ui_helpers.h"
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <string>
-
-/**
- * @brief Structure représentant le héros affiché dans l'interface.
- */
-struct Character {
-    std::string nom{"H\xC3\xA9ros"};
-    int niveau{1};
-    int pv{100};
-    int pm{50};
-    int force{10};
-    int defense{10};
-    int agilite{10};
-    int intelligence{10};
-    Inventory inventaire;
-    Currency monnaie;
-};
 
 /**
  * @brief Rend un texte à l'écran.
@@ -59,18 +45,20 @@ static void renderText(SDL_Renderer* renderer, TTF_Font* font,
  * @param window   Fenêtre SDL où afficher le jeu.
  * @param renderer Rendu associé à cette fenêtre.
  */
-void showGame(SDL_Window* window, SDL_Renderer* renderer) {
+void showGame(SDL_Window* window, SDL_Renderer* renderer, Character& hero) {
     int width, height;
     SDL_GetWindowSize(window, &width, &height);
     int panelH = height / 3;
     SDL_Rect panel{0, height - panelH, width, panelH};
     SDL_Rect invButton{panel.x + width - 150, panel.y + 10, 140, 30};
 
-    Character hero;
-    hero.monnaie.addGold(1); // monnaie initiale
-    hero.inventaire.addItem("Potion de soin");
-    hero.inventaire.addItem("Epee en bois");
-    hero.inventaire.addItem("Bouclier");
+    if (hero.monnaie.totalBronze() == 0)
+        hero.monnaie.addGold(1); // monnaie initiale
+    if (hero.inventaire.getItems().empty()) {
+        hero.inventaire.addItem("Potion de soin");
+        hero.inventaire.addItem("Epee en bois");
+        hero.inventaire.addItem("Bouclier");
+    }
     std::vector<std::string> labItems;
     GameAI ai;
     std::string fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
@@ -123,9 +111,14 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
             } else {
                 if (e.type == SDL_QUIT)
                     running = false;
-                else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
-                    running = false;
-                else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                else if (e.type == SDL_KEYDOWN) {
+                    if (e.key.keysym.sym == SDLK_ESCAPE)
+                        running = false;
+                    else if (e.key.keysym.sym == SDLK_s)
+                        saveCharacter(hero, "savegame.txt");
+                    else if (e.key.keysym.sym == SDLK_l)
+                        loadCharacter(hero, "savegame.txt");
+                } else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                     int mx = e.button.x;
                     int my = e.button.y;
                     if (pointInRect(mx, my, invButton))
@@ -226,5 +219,6 @@ void showGame(SDL_Window* window, SDL_Renderer* renderer) {
         SDL_Delay(16);
     }
 
+    saveCharacter(hero, "savegame.txt");
     TTF_CloseFont(font);
 }

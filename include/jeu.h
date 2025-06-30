@@ -12,6 +12,7 @@
  * @param window   Fenêtre SDL dans laquelle afficher le jeu.
  * @param renderer Rendu SDL utilisé pour dessiner.
  */
-void showGame(SDL_Window* window, SDL_Renderer* renderer);
+#include "character.h"
+void showGame(SDL_Window* window, SDL_Renderer* renderer, Character& hero);
 
 #endif // JEU_H
