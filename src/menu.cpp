@@ -1,5 +1,6 @@
 #include "menu.h"
 #include "character.h"
+#include "character_creation.h"
 #include "jeu.h"
 #include "parametre.h"
 #include "save_system.h"
@@ -91,9 +92,10 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
     auto updateButtons = [&]() {
         int centerX = (width - btnW) / 2;
         buttons.clear();
-        buttons.push_back({{centerX, startY, btnW, btnH}, "Jouer"});
-        buttons.push_back({{centerX, startY + (btnH + spacing), btnW, btnH}, "Charg\xC3\xA9"});
-        buttons.push_back({{centerX, startY + 2 * (btnH + spacing), btnW, btnH}, "Param\xC3\xA8tre"});
+        buttons.push_back({{centerX, startY, btnW, btnH}, "Nouveau"});
+        buttons.push_back({{centerX, startY + (btnH + spacing), btnW, btnH}, "Jouer"});
+        buttons.push_back({{centerX, startY + 2 * (btnH + spacing), btnW, btnH}, "Charg\xC3\xA9"});
+        buttons.push_back({{centerX, startY + 3 * (btnH + spacing), btnW, btnH}, "Param\xC3\xA8tre"});
         buttons.push_back({{width - btnW - 20, height - btnH - 20, btnW, btnH}, "Quitter"});
         for (auto& b : buttons) {
             if (b.texture) {
@@ -124,9 +126,14 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
                     if (pointInRect(mx, my, buttons[i].rect)) {
                         if (i == 0) {
                             Character hero;
-                            showGame(window, renderer, hero);
+                            if (showCharacterCreation(window, renderer, hero))
+                                showGame(window, renderer, hero);
                             updateButtons();
                         } else if (i == 1) {
+                            Character hero;
+                            showGame(window, renderer, hero);
+                            updateButtons();
+                        } else if (i == 2) {
                             Character hero;
                             if (!loadCharacter(hero, "savegame.txt")) {
                                 std::cout << "Aucune sauvegarde.\n";
@@ -134,10 +141,10 @@ int showMenu(SDL_Window* window, SDL_Renderer* renderer,
                                 showGame(window, renderer, hero);
                                 updateButtons();
                             }
-                        } else if (i == 2) {
+                        } else if (i == 3) {
                             showSettings(window, renderer, width, height, targetFPS, language);
                             updateButtons();
-                        } else if (i == 3) {
+                        } else if (i == 4) {
                             running = false; // Quitter button
                         }
                     }
